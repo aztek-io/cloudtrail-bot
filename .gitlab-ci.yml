@@ -29,6 +29,9 @@ validate:
   stage: validate
   script:
     - terraform validate ./Terraform
+  only:
+    changes:
+        - Terraform/*.tf
 
 ########################################
 ### Plan ###############################
@@ -38,6 +41,9 @@ plan:
   stage: build
   script:
     - terraform plan ./Terraform
+  only:
+    changes:
+        - Terraform/*.tf
 
 ########################################
 ### Apply ##############################
@@ -49,6 +55,7 @@ apply:
     - terraform apply -auto-approve ./Terraform
   dependencies:
     - plan
-      # only:
-      # - master
+  only:
+    changes:
+        - Terraform/*.tf
 
