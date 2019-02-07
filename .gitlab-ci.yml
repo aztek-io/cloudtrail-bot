@@ -42,6 +42,8 @@ buildCloudTrailBotArtifacts:
   stage: build_artifacts
   script:
     - |
+        echo "$DOCKER_HOST"
+        echo "$DOCKER_DRIVER
         docker build -t 'cloudtrail_bot:latest' Resources/Scripts/CloudTrailBot/ 1> /dev/null
         docker run -d --name cloudtrail_bot_build cloudtrail_bot:latest
         docker cp cloudtrail_bot_build:/Build.zip "$CLOUDTRAIL_BOT_ARCHIVE"
@@ -49,6 +51,8 @@ buildCloudTrailBotArtifacts:
   variables:
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_DRIVER: overlay2
+  services:
+    - docker:dind
   artifacts:
     paths:
     - "$CLOUDTRAIL_BOT_ARCHIVE"
