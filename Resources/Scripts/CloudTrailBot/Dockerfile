@@ -13,7 +13,7 @@ COPY cloudtrail_bot.py /Build/cloudtrail_bot.py
 RUN virtualenv -p /usr/bin/python2.7 /Build
 
 RUN cd /Build && \
-        source bin/activate && # \
+        source bin/activate # && \
         # pip install -r requirements.txt
 
 RUN cd /Build/ && \
