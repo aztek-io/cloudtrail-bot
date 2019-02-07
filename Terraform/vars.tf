@@ -16,3 +16,12 @@ variable "global" {
 ########################################
 
 data "aws_iam_account_alias" "current" {}
+
+########################################
+### Variable Interpolation #############
+########################################
+
+locals {
+    bucket_name = "security.${data.aws_iam_account_alias.current.account_alias}.logs"
+}
+

@@ -1,5 +1,5 @@
-resource "aws_s3_bucket" "foo" {
-    bucket        = "logs.${data.aws_iam_account_alias.current.account_alias}"
+resource "aws_s3_bucket" "cloudtrail_logs" {
+    bucket        = "${local.bucket_name}"
     force_destroy = true
 
     policy = <<POLICY
@@ -13,7 +13,7 @@ resource "aws_s3_bucket" "foo" {
               "Service": "cloudtrail.amazonaws.com"
             },
             "Action": "s3:GetBucketAcl",
-            "Resource": "arn:aws:s3:::logs.${data.aws_iam_account_alias.current.account_alias}"
+            "Resource": "arn:aws:s3:::${local.bucket_name}"
         },
         {
             "Sid": "",
@@ -22,7 +22,7 @@ resource "aws_s3_bucket" "foo" {
               "Service": "cloudtrail.amazonaws.com"
             },
             "Action": "s3:PutObject",
-            "Resource": "arn:aws:s3:::logs.${data.aws_iam_account_alias.current.account_alias}/*",
+            "Resource": "arn:aws:s3:::${local.bucket_name}/*",
             "Condition": {
                 "StringEquals": {
                     "s3:x-amz-acl": "bucket-owner-full-control"
