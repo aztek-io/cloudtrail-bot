@@ -106,4 +106,5 @@ apply:
     changes:
       - .gitlab-ci.yml
       - Terraform/*.tf
+      - Resources/Scripts/CloudTrailBot/*
 
