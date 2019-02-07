@@ -33,3 +33,14 @@ resource "aws_s3_bucket" "cloudtrail_logs" {
 }
 POLICY
 }
+
+resource "aws_s3_bucket_notification" "cloudtrail_logs" {
+    bucket = "${aws_s3_bucket.cloudtrail_logs.id}"
+
+    lambda_function {
+        lambda_function_arn = "${aws_lambda_function.cloudtrail_bot.arn}"
+        events              = [
+            "s3:ObjectCreated:*"
+        ]
+    }
+}
