@@ -6,7 +6,7 @@
 ####################
 
 resource "aws_lambda_function" "cloudtrail_bot" {
-    s3_bucket       = "artifacts.aztek.io"
+    s3_bucket       = "archives.aztek.io"
     s3_key          = "cloudtrail_bot.zip"
     function_name   = "CloudTrailBot"
     role            = "${aws_iam_role.lambda_cloudtrail_bot.arn}"
