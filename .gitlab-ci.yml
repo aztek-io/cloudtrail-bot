@@ -17,28 +17,15 @@ before_script:
   - terraform init ./Terraform
 
 stages:
-  - validate
-  - build
+  - plan
   - deploy
-
-########################################
-### Validte ############################
-########################################
-
-validate:
-  stage: validate
-  script:
-    - terraform validate ./Terraform
-  only:
-    changes:
-        - Terraform/*.tf
 
 ########################################
 ### Plan ###############################
 ########################################
 
 plan:
-  stage: build
+  stage: plan
   script:
     - terraform plan ./Terraform
   only:
