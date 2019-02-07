@@ -8,7 +8,7 @@ RUN pip install virtualenv && \
         mkdir /Build
 
 COPY cloudtrail_bot.py /Build/cloudtrail_bot.py
-COPY requirements.txt /Build/requirements.txt
+# COPY requirements.txt /Build/requirements.txt
 
 RUN virtualenv -p /usr/bin/python2.7 /Build
 
