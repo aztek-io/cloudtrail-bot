@@ -58,6 +58,7 @@ buildCloudTrailBotArtifacts:
     expire_in: 5 minutes
   only:
     changes:
+      - .gitlab-ci.yml
       - Resources/Scripts/CloudTrailBot/*
 
 ########################################
@@ -67,11 +68,15 @@ buildCloudTrailBotArtifacts:
 pushCloudTrailBotArtifacts:
   stage: push_artifacts
   script:
-    - |
-        aws s3 cp "$CLOUDTRAIL_BOT_ARCHIVE" "s3://${ARCHIVE_BUCKET}"
-  image: aztek/awscli
+    - aws s3 cp "$CLOUDTRAIL_BOT_ARCHIVE" "s3://${ARCHIVE_BUCKET}"
+  image:
+    name: aztek/awscli
+    entrypoint:
+    - '/usr/bin/env'
+    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
   only:
     changes:
+      - .gitlab-ci.yml
       - Resources/Scripts/CloudTrailBot/*
 
 ########################################
@@ -84,7 +89,8 @@ plan:
     - terraform plan ./Terraform
   only:
     changes:
-        - Terraform/*.tf
+      - .gitlab-ci.yml
+      - Terraform/*.tf
 
 ########################################
 ### Apply ##############################
@@ -98,5 +104,6 @@ apply:
     - plan
   only:
     changes:
-        - Terraform/*.tf
+      - .gitlab-ci.yml
+      - Terraform/*.tf
 
