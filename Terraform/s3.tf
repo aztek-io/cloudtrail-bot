@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "foo" {
-    bucket        = "logs_${data.aws_iam_account_alias.current.account_alias}"
+    bucket        = "logs.${data.aws_iam_account_alias.current.account_alias}"
     force_destroy = true
 
     policy = <<POLICY
