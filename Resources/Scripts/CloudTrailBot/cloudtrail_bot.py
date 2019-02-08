@@ -5,8 +5,7 @@ import os
 import sys
 import json
 import re
-
-from urllib2 import Request, urlopen, URLError, HTTPError
+import requests
 
 #######################################
 ### Logging Settings ##################
@@ -145,16 +144,16 @@ def create_slack_payload(json_dict, color='#FF8800', reason='New Cloud Trail Eve
 def post_to_slack(payload):
     logger.info('POST-ing payload: {}'.format(payload))
 
-    req = Request(SLACK_WEBHOOK, json.dumps(payload))
-
     try:
-        response = urlopen(req)
-        response.read()
-        logger.info("Message posted to %s", payload['channel'])
-    except HTTPError as e:
-        error("Request failed: %d %s", e.code, e.reason)
-    except URLError as e:
-        error("Server connection failed: %s", e.reason)
+        req = requests.post(SLACK_WEBHOOK, data=json.dumps(payload))
+        logger.info("Message posted to {}".format(payload['channel']))
+    except requests.exceptions.Timeout as e:
+        error("Server connection failed: {}".format(e.reason))
+    except requests.exceptions.RequestException as e:
+        error("Request failed: {} {}".format(e.status_code, e.reason))
+
+    if req.status_code != 200:
+        error("Non 200 status code: {}\n{}\n{}".format(req.status_code, req.headers, req.text))
 
 
 #######################################

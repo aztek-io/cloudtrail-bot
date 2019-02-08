@@ -22,6 +22,15 @@ before_script:
         if command -v terraform; then
             terraform --version
             terraform init ./Terraform
+            cat > ./Terraform/secrets.tf << EOF
+        variable "secret" {
+            type    = "map"
+            default = {
+                slack_webhook = "$SLACK_WEBHOOK",
+                slack_channel = "$SLACK_CHANNEL"
+            }
+        }
+        EOF
         elif command -v aws; then
             aws --version;
         elif command -v docker; then
