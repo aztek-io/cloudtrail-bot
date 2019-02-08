@@ -40,7 +40,7 @@ USERNAME        = 'CloudTrail Bot'
 #######################################
 
 def main(event, context):
-    # logger.info('Event: {}'.format(json.dumps(event, indent=4)))
+    logger.info('Event: {}'.format(json.dumps(event, indent=4)))
 
     ignore_list = ['^Describe', '^List', '^Get']
 
