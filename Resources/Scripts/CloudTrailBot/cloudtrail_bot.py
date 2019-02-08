@@ -46,13 +46,16 @@ def main(event, context):
 
     logger.info(ignore_list)
 
-    bucket, s3_object   = parse_event(event)
-    cloudtrail_event    = get_object_contents(bucket, s3_object)
-    note_worthy_events  = parse_cloudtrail_event(cloudtrail_event, ignore_list)
+    for e in event['Records']:
+        bucket, s3_object   = parse_event(e)
+        cloudtrail_event    = get_object_contents(bucket, s3_object)
+        note_worthy_events  = parse_cloudtrail_event(cloudtrail_event, ignore_list)
 
-    for n in note_worthy_events:
-        payload = create_slack_payload(n)
-        post_to_slack(payload)
+        for n in note_worthy_events:
+            payload = create_slack_payload(n)
+            post_to_slack(payload)
+
+    logger.info('Exiting Lambda Function.')
 
 
 #######################################
