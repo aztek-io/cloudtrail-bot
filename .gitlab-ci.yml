@@ -19,10 +19,7 @@ variables:
 
 before_script:
   - |
-        if command -v terraform; then
-            terraform --version
-            terraform init ./Terraform
-            cat > ./Terraform/secrets.tf << EOF
+        cat > ./Terraform/secrets.tf << EOF
         variable "secret" {
             type    = "map"
             default = {
@@ -31,6 +28,10 @@ before_script:
             }
         }
         EOF
+  - |
+        if command -v terraform; then
+            terraform --version
+            terraform init ./Terraform
         elif command -v aws; then
             aws --version;
         elif command -v docker; then
