@@ -41,6 +41,7 @@ stages:
   - build_artifacts
   - push_artifacts
   - plan
+  - reprovision
   - deploy
 
 ########################################
@@ -106,7 +107,7 @@ plan:
 ########################################
 
 destroy:
-  stage: deploy
+  stage: reprovision
   script:
     - terraform destroy --target aws_lambda_function.cloudtrail_bot -auto-approve ./Terraform
   dependencies:
