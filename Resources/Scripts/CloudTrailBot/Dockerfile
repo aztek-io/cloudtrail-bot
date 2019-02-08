@@ -2,7 +2,7 @@ FROM amazonlinux
 
 LABEL maintainer="robert@aztek.io"
 
-RUN yum -y install python37 python37-pip zip && \
+RUN yum -y install python37 zip && \
         yum clean all
 
 RUN pip3 install virtualenv && \
@@ -15,7 +15,7 @@ RUN virtualenv -p /usr/bin/python3.7 /tmp/Build
 WORKDIR /tmp/Build
 
 RUN source bin/activate
-RUN pip3 install -r requirements.txt
+RUN pip3.7 install -r requirements.txt
 
 RUN zip -r /tmp/Build.zip \
         cloudtrail_bot.py \
