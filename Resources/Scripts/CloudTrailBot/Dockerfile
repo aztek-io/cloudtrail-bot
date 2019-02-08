@@ -15,7 +15,7 @@ RUN virtualenv -p /usr/bin/python3.7 /tmp/Build
 WORKDIR /tmp/Build
 
 RUN source bin/activate
-RUN pip install -r requirements.txt
+RUN pip-3.7 install -r requirements.txt
 
 RUN zip -r /tmp/Build.zip \
         cloudtrail_bot.py \
