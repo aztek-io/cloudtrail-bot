@@ -53,9 +53,9 @@ buildCloudTrailBotArtifacts:
   script:
     - echo "$DOCKER_HOST"
     - echo "$DOCKER_DRIVER"
-    - docker build -t 'cloudtrail_bot:latest' Resources/Scripts/CloudTrailBot/ 1> /dev/null
+    - docker build -t 'cloudtrail_bot:latest' Resources/Scripts/CloudTrailBot/
     - docker run -d --name cloudtrail_bot_build cloudtrail_bot:latest
-    - docker cp cloudtrail_bot_build:/Build.zip "$CLOUDTRAIL_BOT_ARCHIVE"
+    - docker cp cloudtrail_bot_build:/tmp/Build.zip "$CLOUDTRAIL_BOT_ARCHIVE"
   image: docker
   variables:
     DOCKER_HOST: tcp://docker:2375/
