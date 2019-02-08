@@ -93,6 +93,21 @@ plan:
       - Terraform/*.tf
 
 ########################################
+### Reprovision ########################
+########################################
+
+destroy:
+  stage: deploy
+  script:
+    - terraform destroy --target aws_lambda_function.cloudtrail_bot -auto-approve ./Terraform
+  dependencies:
+    - push_artifacts
+  only:
+    changes:
+      - .gitlab-ci.yml
+      - Resources/Scripts/CloudTrailBot/*
+
+########################################
 ### Apply ##############################
 ########################################
 
