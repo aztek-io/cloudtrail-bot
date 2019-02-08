@@ -101,7 +101,7 @@ destroy:
   script:
     - terraform destroy --target aws_lambda_function.cloudtrail_bot -auto-approve ./Terraform
   dependencies:
-    - push_artifacts
+    - pushCloudTrailBotArtifacts
   only:
     changes:
       - .gitlab-ci.yml
