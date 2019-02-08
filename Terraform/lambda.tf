@@ -11,7 +11,7 @@ resource "aws_lambda_function" "cloudtrail_bot" {
     function_name   = "CloudTrailBot"
     role            = "${aws_iam_role.lambda_cloudtrail_bot.arn}"
     handler         = "cloudtrail_bot.lambda_handler"
-    runtime         = "python2.7"
+    runtime         = "python3.7"
     memory_size     = 128
     timeout         = 5
     environment {

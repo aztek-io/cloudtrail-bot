@@ -2,26 +2,27 @@ FROM amazonlinux
 
 LABEL maintainer="robert@aztek.io"
 
-RUN yum install python2-pip zip -y
+RUN yum -y install python37 python37-pip zip && \
+        yum clean all
 
-RUN pip install virtualenv && \
+RUN pip3 install virtualenv && \
         mkdir /Build
 
 COPY cloudtrail_bot.py /Build/cloudtrail_bot.py
 # COPY requirements.txt /Build/requirements.txt
 
-RUN virtualenv -p /usr/bin/python2.7 /Build
+RUN virtualenv -p /usr/bin/python3.7 /Build
 
-RUN cd /Build && \
-        source bin/activate # && \
-        # pip install -r requirements.txt
+WORKDIR /Build
 
-RUN cd /Build/ && \
-        zip /Build.zip \
-            cloudtrail_bot.py \
-            bin/*
+RUN source bin/activate
+# RUN pip install -r requirements.txt
+RUN zip -r /Build.zip \
+        cloudtrail_bot.py \
+        bin/*
 
-RUN cd /Build/lib/python2.7/site-packages/ && \
-        zip -r /Build.zip . && \
-        cd /Build/lib64/python2.7/site-packages/ && \
-        zip -r /Build.zip .
+WORKDIR /Build/lib/python3.7/site-packages/
+RUN zip -r /Build.zip .
+
+WORKDIR /Build/lib64/python3.7/site-packages/
+RUN zip -r /Build.zip .
