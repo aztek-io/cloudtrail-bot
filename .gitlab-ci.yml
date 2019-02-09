@@ -1,0 +1,137 @@
+########################################
+### Image ##############################
+########################################
+
+image:
+  name: hashicorp/terraform:light
+  entrypoint:
+    - '/usr/bin/env'
+    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+variables:
+  CLOUDTRAIL_BOT_ARCHIVE: Resources/Scripts/CloudTrailBot/cloudtrail_bot.zip
+  CLOUDTRAIL_BOT_SCRIPT: Resources/Scripts/CloudTrailBot/cloudtrail_bot.py
+  ARCHIVE_BUCKET: archives.aztek.io
+
+########################################
+### Prerequisites ######################
+########################################
+
+before_script:
+  - |
+        cat > ./Terraform/secrets.tf << EOF
+        variable "secret" {
+            type    = "map"
+            default = {
+                slack_webhook = "$SLACK_WEBHOOK",
+                slack_channel = "$SLACK_CHANNEL"
+            }
+        }
+        EOF
+  - |
+        if command -v terraform; then
+            terraform --version
+            terraform init ./Terraform
+        elif command -v aws; then
+            aws --version;
+        elif command -v docker; then
+            docker --version;
+        fi
+
+stages:
+  - build_artifacts
+  - push_artifacts
+  - plan
+  - reprovision
+  - deploy
+
+########################################
+### Build Artifacts ####################
+########################################
+
+buildCloudTrailBotArtifacts:
+  stage: build_artifacts
+  script:
+    - echo "$DOCKER_HOST"
+    - echo "$DOCKER_DRIVER"
+    - docker build -t 'cloudtrail_bot:latest' Resources/Scripts/CloudTrailBot/
+    - docker run -d --name cloudtrail_bot_build cloudtrail_bot:latest
+    - docker cp cloudtrail_bot_build:/tmp/Build.zip "$CLOUDTRAIL_BOT_ARCHIVE"
+  image: docker
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_DRIVER: overlay2
+  services:
+    - docker:dind
+  artifacts:
+    paths:
+    - "$CLOUDTRAIL_BOT_ARCHIVE"
+    expire_in: 5 minutes
+  only:
+    changes:
+      - .gitlab-ci.yml
+      - Resources/Scripts/CloudTrailBot/*
+
+########################################
+### Build Artifacts ####################
+########################################
+
+pushCloudTrailBotArtifacts:
+  stage: push_artifacts
+  script:
+    - aws s3 cp "$CLOUDTRAIL_BOT_ARCHIVE" "s3://${ARCHIVE_BUCKET}"
+  image:
+    name: aztek/awscli
+    entrypoint:
+    - '/usr/bin/env'
+    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  only:
+    changes:
+      - .gitlab-ci.yml
+      - Resources/Scripts/CloudTrailBot/*
+
+########################################
+### Plan ###############################
+########################################
+
+plan:
+  stage: plan
+  script:
+    - terraform plan ./Terraform
+  only:
+    changes:
+      - .gitlab-ci.yml
+      - Terraform/*.tf
+
+########################################
+### Reprovision ########################
+########################################
+
+destroy:
+  stage: reprovision
+  script:
+    - terraform destroy --target aws_lambda_function.cloudtrail_bot -auto-approve ./Terraform
+  dependencies:
+    - pushCloudTrailBotArtifacts
+  only:
+    changes:
+      - .gitlab-ci.yml
+      - Resources/Scripts/CloudTrailBot/*
+
+########################################
+### Apply ##############################
+########################################
+
+apply:
+  stage: deploy
+  script:
+    - terraform apply -auto-approve ./Terraform
+  dependencies:
+    - plan
+    - destroy
+  only:
+    changes:
+      - .gitlab-ci.yml
+      - Terraform/*.tf
+      - Resources/Scripts/CloudTrailBot/*
+
