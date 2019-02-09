@@ -47,7 +47,8 @@ def main(event, context):
         '^Assume*',
         '^List*',
         '^Get*',
-        '^Decrypt*'
+        '^Decrypt*',
+        '^Lookup*'
     ]
 
     logger.info(ignore_list)
