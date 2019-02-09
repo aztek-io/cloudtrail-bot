@@ -42,7 +42,7 @@ USERNAME        = 'CloudTrail Bot'
 def main(event, context):
     logger.info('Event: {}'.format(json.dumps(event, indent=4)))
 
-    ignore_list = ['^Describe', '^Assume*', '^List', '^Get']
+    ignore_list = ['^Describe', '^Assume*', '^List', '^Get', '^Decrypt']
 
     logger.info(ignore_list)
 
@@ -177,7 +177,7 @@ def create_slack_payload(json_dict, color='#FF8800', reason='New Cloud Trail Eve
                     },
                     {
                         "title": "Resources",
-                        "value": '```{}```'.format(json.dumps(json_dict['resources'], indent=4)),
+                        "value": '```\n{}\n```'.format(json.dumps(json_dict['resources'], indent=4)),
                         "short": False
                     }
                 ]
