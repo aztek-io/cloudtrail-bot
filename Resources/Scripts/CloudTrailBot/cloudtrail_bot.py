@@ -42,7 +42,13 @@ USERNAME        = 'CloudTrail Bot'
 def main(event, context):
     logger.info('Event: {}'.format(json.dumps(event, indent=4)))
 
-    ignore_list = ['^Describe', '^Assume*', '^List', '^Get', '^Decrypt']
+    ignore_list = [
+        '^Describe*',
+        '^Assume*',
+        '^List*',
+        '^Get*',
+        '^Decrypt*'
+    ]
 
     logger.info(ignore_list)
 
@@ -104,6 +110,9 @@ def parse_cloudtrail_event(cloudtrail_event, ignore_list):
     for cte in cloudtrail_event['Records']:
         simplified_event = create_simplified_event(cte)
 
+        if not simplified_event:
+            continue
+
         ignore_logic = None
 
         logger.info('action: {}'.format(simplified_event['eventName']))
@@ -127,9 +136,9 @@ def parse_cloudtrail_event(cloudtrail_event, ignore_list):
 
 def create_simplified_event(cloudtrail_event):
     try:
-        user = cloudtrail_event['userIdentity']['principalId']
+        user = cloudtrail_event['userIdentity']['userName']
     except KeyError:
-        user = cloudtrail_event['userIdentity']['invokedBy']
+        return False
 
     try:
         resources   = cloudtrail_event['resources']
@@ -139,6 +148,7 @@ def create_simplified_event(cloudtrail_event):
     try:
         action      = cloudtrail_event['eventName']
         event_time  = cloudtrail_event['eventTime']
+        region      = cloudtrail_event['awsRegion']
     except KeyError:
         error('Parsing error: {}'.format(json.dumps(cloudtrail_event, indent=4)))
 
@@ -146,7 +156,8 @@ def create_simplified_event(cloudtrail_event):
         'invokedBy': user,
         'eventTime': event_time,
         'eventName': action,
-        'resources': resources
+        'resources': resources,
+        'Region': region
     }
 
     return simplified_event
@@ -161,7 +172,12 @@ def create_slack_payload(json_dict, color='#FF8800', reason='New Cloud Trail Eve
                 "fallback": reason,
                 "color": color,
                 "title": reason,
-                "title_link": "https://us-west-2.console.aws.amazon.com/cloudtrail/home?region=us-west-2#/events",
+                "title_link": "https://{}.console.aws.amazon.com/cloudtrail/home?region={}#/events?StartTime={}&EndTime={}".format(
+                   json_dict['Region'],
+                   json_dict['Region'],
+                   json_dict['eventTime'],
+                   json_dict['eventTime']
+                ),
                 "fields": [
                     {
                         "title": "Initiator",
