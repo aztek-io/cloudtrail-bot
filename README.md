@@ -22,5 +22,5 @@ Checkout .gitlab-ci.yml for current build steps.  Don't forget to create secrets
 ## Recommendations:
 
 - Configure a new webhook for this app in slack.  I personally try to use a different webhook for each new app that I write in the event of one of them being compromised
-- Use Resources/Images/Slack\ Icons/cloudtrail_padding.png as the default image for your new webhook as a fallback
-- Use Resources/Images/Slack\ Icons/cloudtrail.png as a new emoticon :cloudtrail:
+- Use `Resources/Images/Slack\ Icons/cloudtrail_padding.png` as the default image for your new webhook as a fallback
+- Use `Resources/Images/Slack\ Icons/cloudtrail.png` as a new emoticon `:cloudtrail:`
