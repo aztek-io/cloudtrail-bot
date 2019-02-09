@@ -71,8 +71,8 @@ def main(event, context):
 ### Boto3 Configs #####################
 #######################################
 
-def error(message, code=1):
-    logger.error(message)
+def fatal(message, code=1):
+    logger.critical(message)
     sys.exit(code)
 
 
@@ -168,7 +168,7 @@ def create_simplified_event(cloudtrail_event):
         event_time  = cloudtrail_event['eventTime']
         region      = cloudtrail_event['awsRegion']
     except KeyError:
-        error('Parsing error: {}'.format(json.dumps(cloudtrail_event, indent=4)))
+        fatal('Parsing error: {}'.format(json.dumps(cloudtrail_event, indent=4)))
 
     simplified_event = {
         'invokedBy': user,
@@ -234,12 +234,12 @@ def post_to_slack(payload):
         req = requests.post(SLACK_WEBHOOK, data=json.dumps(payload), timeout=3)
         logger.info("Message posted to {}".format(payload['channel']))
     except requests.exceptions.Timeout as e:
-        error("Server connection failed: {}".format(e.reason))
+        fatal("Server connection failed: {}".format(e.reason))
     except requests.exceptions.RequestException as e:
-        error("Request failed: {} {}".format(e.status_code, e.reason))
+        fatal("Request failed: {} {}".format(e.status_code, e.reason))
 
     if req.status_code != 200:
-        error("Non 200 status code: {}\n{}\n{}".format(req.status_code, req.headers, req.text))
+        fatal("Non 200 status code: {}\n{}\n{}".format(req.status_code, req.headers, req.text), code=255)
 
 
 #######################################
