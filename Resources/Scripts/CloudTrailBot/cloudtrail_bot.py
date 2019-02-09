@@ -42,21 +42,22 @@ USERNAME        = 'CloudTrail Bot'
 def main(event, context):
     logger.info('Event: {}'.format(json.dumps(event, indent=4)))
 
-    ignore_list = [
+    event_ignore_list = [
         '^Describe*',
         '^Assume*',
         '^List*',
         '^Get*',
         '^Decrypt*',
-        '^Lookup*'
+        '^Lookup*',
+        'CreateLogStream'
     ]
 
-    logger.info(ignore_list)
+    logger.info('Event ignore pattern list: {}'.format(event_ignore_list))
 
     for e in event['Records']:
         bucket, s3_object   = parse_event(e)
         cloudtrail_event    = get_object_contents(bucket, s3_object)
-        note_worthy_events  = parse_cloudtrail_event(cloudtrail_event, ignore_list)
+        note_worthy_events  = parse_cloudtrail_event(cloudtrail_event, event_ignore_list)
 
         if note_worthy_events:
             for n in note_worthy_events:
