@@ -42,25 +42,26 @@ USERNAME        = 'CloudTrail Bot'
 def main(event, context):
     logger.info('Event: {}'.format(json.dumps(event, indent=4)))
 
-    ignore_list = [
+    event_ignore_list = [
         '^Describe*',
         '^Assume*',
         '^List*',
         '^Get*',
-        '^Decrypt*'
+        '^Decrypt*',
+        '^Lookup*',
+        'CreateLogStream'
     ]
 
-    logger.info(ignore_list)
+    logger.info('Event ignore pattern list: {}'.format(event_ignore_list))
 
     for e in event['Records']:
         bucket, s3_object   = parse_event(e)
         cloudtrail_event    = get_object_contents(bucket, s3_object)
-        note_worthy_events  = parse_cloudtrail_event(cloudtrail_event, ignore_list)
+        note_worthy_events  = parse_cloudtrail_event(cloudtrail_event, event_ignore_list)
 
-        if note_worthy_events:
-            for n in note_worthy_events:
-                payload = create_slack_payload(n)
-                post_to_slack(payload)
+        for n in note_worthy_events:
+            payload = create_slack_payload(n)
+            post_to_slack(payload)
 
     logger.info('Exiting Lambda Function.')
 
@@ -69,8 +70,8 @@ def main(event, context):
 ### Boto3 Configs #####################
 #######################################
 
-def error(message, code=1):
-    logger.error(message)
+def fatal(message, code=1):
+    logger.critical(message)
     sys.exit(code)
 
 
@@ -128,7 +129,6 @@ def parse_cloudtrail_event(cloudtrail_event, ignore_list):
         else:
             logger.info('Not appending.  ignore_logic: {}'.format(ignore_logic))
 
-
     logger.info(json.dumps(note_worthy_events, indent=4))
 
     return note_worthy_events
@@ -138,7 +138,24 @@ def create_simplified_event(cloudtrail_event):
     try:
         user = cloudtrail_event['userIdentity']['userName']
     except KeyError:
-        return False
+        try:
+            principalId = cloudtrail_event['userIdentity']['principalId']
+        except KeyError:
+            logger.error(
+                'Unable to determine the user for this event: {}'.format(
+                    json.dumps(
+                        cloudtrail_event,
+                        indent=4
+                    )
+                )
+            )
+            return False
+
+        try:
+            user = principalId.split(':')[1]
+        except IndexError:
+            logger.error('Unable to split principalId: {}'.format(principalId))
+            return False
 
     try:
         resources   = cloudtrail_event['resources']
@@ -150,7 +167,7 @@ def create_simplified_event(cloudtrail_event):
         event_time  = cloudtrail_event['eventTime']
         region      = cloudtrail_event['awsRegion']
     except KeyError:
-        error('Parsing error: {}'.format(json.dumps(cloudtrail_event, indent=4)))
+        fatal('Parsing error: {}'.format(json.dumps(cloudtrail_event, indent=4)))
 
     simplified_event = {
         'invokedBy': user,
@@ -209,19 +226,20 @@ def create_slack_payload(json_dict, color='#FF8800', reason='New Cloud Trail Eve
 
     return payload
 
+
 def post_to_slack(payload):
     logger.info('POST-ing payload: {}'.format(payload))
 
     try:
-        req = requests.post(SLACK_WEBHOOK, data=json.dumps(payload))
+        req = requests.post(SLACK_WEBHOOK, data=json.dumps(payload), timeout=3)
         logger.info("Message posted to {}".format(payload['channel']))
     except requests.exceptions.Timeout as e:
-        error("Server connection failed: {}".format(e.reason))
+        fatal("Server connection failed: {}".format(e.reason))
     except requests.exceptions.RequestException as e:
-        error("Request failed: {} {}".format(e.status_code, e.reason))
+        fatal("Request failed: {} {}".format(e.status_code, e.reason))
 
     if req.status_code != 200:
-        error("Non 200 status code: {}\n{}\n{}".format(req.status_code, req.headers, req.text))
+        fatal("Non 200 status code: {}\n{}\n{}".format(req.status_code, req.headers, req.text), code=255)
 
 
 #######################################
@@ -252,7 +270,7 @@ if __name__ == '__main__':
                         "arn": "arn:aws:s3:::security.aztek.logs"
                     },
                     "object": {
-                        "key": "prefix/AWSLogs/976168295228/CloudTrail/us-west-2/2019/02/09/976168295228_CloudTrail_us-west-2_20190209T0525Z_TF56lRbOwai4hCtC.json.gz"
+                        "key": "prefix/AWSLogs/976168295228/CloudTrail/us-west-2/2019/02/09/976168295228_CloudTrail_us-west-2_20190209T1735Z_V69UOWYLI6vAjDvM.json.gz"
                     }
                 }
             }
