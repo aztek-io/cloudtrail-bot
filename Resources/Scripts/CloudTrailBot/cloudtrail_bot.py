@@ -59,10 +59,9 @@ def main(event, context):
         cloudtrail_event    = get_object_contents(bucket, s3_object)
         note_worthy_events  = parse_cloudtrail_event(cloudtrail_event, event_ignore_list)
 
-        if note_worthy_events:
-            for n in note_worthy_events:
-                payload = create_slack_payload(n)
-                post_to_slack(payload)
+        for n in note_worthy_events:
+            payload = create_slack_payload(n)
+            post_to_slack(payload)
 
     logger.info('Exiting Lambda Function.')
 
@@ -226,6 +225,7 @@ def create_slack_payload(json_dict, color='#FF8800', reason='New Cloud Trail Eve
     }
 
     return payload
+
 
 def post_to_slack(payload):
     logger.info('POST-ing payload: {}'.format(payload))
