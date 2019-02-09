@@ -8,7 +8,7 @@ That's why I wrote this lambda function.
 
 ## How does it work?
 
-A cloudtrail is is created loging json.gz files to a s3 bucket.  A lambda is triggered on new s3 object creation, and relevent events are pushed to Slack.
+A CloudTrail is is created logging json.gz files to a s3 bucket.  A lambda is triggered on new s3 object creation in said bucket (`security.<account_alias>.logs`), and relevant events (excludes more read actions like `^List*` or `^Describe*`) are pushed to Slack.
 
 ## How do I install it in my Environment?
 
