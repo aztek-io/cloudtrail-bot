@@ -130,7 +130,6 @@ def parse_cloudtrail_event(cloudtrail_event, ignore_list):
         else:
             logger.info('Not appending.  ignore_logic: {}'.format(ignore_logic))
 
-
     logger.info(json.dumps(note_worthy_events, indent=4))
 
     return note_worthy_events
@@ -141,15 +140,23 @@ def create_simplified_event(cloudtrail_event):
         user = cloudtrail_event['userIdentity']['userName']
     except KeyError:
         try:
-            user = cloudtrail_event['userIdentity']['principalId']
+            principalId = cloudtrail_event['userIdentity']['principalId']
         except KeyError:
+            logger.error(
+                'Unable to determine the user for this event: {}'.format(
+                    json.dumps(
+                        cloudtrail_event,
+                        indent=4
+                    )
+                )
+            )
             return False
 
-    try:
-        user = user.split(':')[1]
-    except IndexError:
-        # This is probably a service account.
-        return False
+        try:
+            user = principalId.split(':')[1]
+        except IndexError:
+            logger.error('Unable to split principalId: {}'.format(principalId))
+            return False
 
     try:
         resources   = cloudtrail_event['resources']
@@ -224,7 +231,7 @@ def post_to_slack(payload):
     logger.info('POST-ing payload: {}'.format(payload))
 
     try:
-        req = requests.post(SLACK_WEBHOOK, data=json.dumps(payload))
+        req = requests.post(SLACK_WEBHOOK, data=json.dumps(payload), timeout=3)
         logger.info("Message posted to {}".format(payload['channel']))
     except requests.exceptions.Timeout as e:
         error("Server connection failed: {}".format(e.reason))
@@ -263,7 +270,7 @@ if __name__ == '__main__':
                         "arn": "arn:aws:s3:::security.aztek.logs"
                     },
                     "object": {
-                        "key": "prefix/AWSLogs/976168295228/CloudTrail/us-west-2/2019/02/09/976168295228_CloudTrail_us-west-2_20190209T0525Z_TF56lRbOwai4hCtC.json.gz"
+                        "key": "prefix/AWSLogs/976168295228/CloudTrail/us-west-2/2019/02/09/976168295228_CloudTrail_us-west-2_20190209T1735Z_V69UOWYLI6vAjDvM.json.gz"
                     }
                 }
             }
