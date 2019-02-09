@@ -49,7 +49,8 @@ def main(event, context):
         '^Get*',
         '^Decrypt*',
         '^Lookup*',
-        'CreateLogStream'
+        '^CreateLogStream$',
+        '^RenewRole$'
     ]
 
     logger.info('Event ignore pattern list: {}'.format(event_ignore_list))
