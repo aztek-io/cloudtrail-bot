@@ -138,6 +138,15 @@ def create_simplified_event(cloudtrail_event):
     try:
         user = cloudtrail_event['userIdentity']['userName']
     except KeyError:
+        try:
+            user = cloudtrail_event['userIdentity']['principalId']
+        except KeyError:
+            return False
+
+    try:
+        user = user.split(':')[1]
+    except IndexError:
+        # This is probably a service account.
         return False
 
     try:
