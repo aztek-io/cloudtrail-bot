@@ -51,9 +51,10 @@ def main(event, context):
         cloudtrail_event    = get_object_contents(bucket, s3_object)
         note_worthy_events  = parse_cloudtrail_event(cloudtrail_event, ignore_list)
 
-        for n in note_worthy_events:
-            payload = create_slack_payload(n)
-            post_to_slack(payload)
+        if note_worthy_events:
+            for n in note_worthy_events:
+                payload = create_slack_payload(n)
+                post_to_slack(payload)
 
     logger.info('Exiting Lambda Function.')
 
@@ -90,7 +91,7 @@ def get_object_contents(bucket, s3_object):
 
     contents = json.loads(gzip.decompress(body))
 
-    logger.info('Object retrieved: {}'.format(json.dumps(contents, indent=4)))
+    logger.info('Object contents retrieved: {}'.format(type(contents)))
 
     return contents
 
@@ -98,8 +99,10 @@ def get_object_contents(bucket, s3_object):
 def parse_cloudtrail_event(cloudtrail_event, ignore_list):
     note_worthy_events = list()
 
-    for cloudtrail_event in cloudtrail_event['Records']:
-        simplified_event = create_simplified_event(cloudtrail_event)
+    logger.info('Iterating over cloudtrail events.')
+
+    for cte in cloudtrail_event['Records']:
+        simplified_event = create_simplified_event(cte)
 
         ignore_logic = None
 
@@ -222,18 +225,22 @@ if __name__ == '__main__':
     logger.addHandler(stream)
 
     event = {
-        "awsRegion": "us-west-2",
-        "eventTime": "2019-02-08T13:46:44.679Z",
-        "eventName": "ObjectCreated:Put",
-        "s3": {
-            "bucket": {
-                "name": "security.aztek.logs",
-                "arn": "arn:aws:s3:::security.aztek.logs"
-            },
-            "object": {
-                "key": "prefix/AWSLogs/976168295228/CloudTrail/us-west-2/2019/02/08/976168295228_CloudTrail_us-west-2_20190208T1350Z_GfAMIWcKag0WzGeB.json.gz"
-           }
-        }
+        "Records": [
+            {
+                "awsRegion": "us-west-2",
+                "eventTime": "2019-02-08T13:46:44.679Z",
+                "eventName": "ObjectCreated:Put",
+                "s3": {
+                    "bucket": {
+                        "name": "security.aztek.logs",
+                        "arn": "arn:aws:s3:::security.aztek.logs"
+                    },
+                    "object": {
+                        "key": "prefix/AWSLogs/976168295228/CloudTrail/us-west-2/2019/02/09/976168295228_CloudTrail_us-west-2_20190209T0525Z_TF56lRbOwai4hCtC.json.gz"
+                    }
+                }
+            }
+        ]
     }
 
     main(event, None)
