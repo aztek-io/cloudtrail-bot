@@ -16,8 +16,8 @@ Checkout .gitlab-ci.yml for current build steps.  Don't forget to create secrets
 
 ## Where are the pretty pictures?
 
-![](Resources/Images/Screen Shots/Screen Shot 2019-02-09 at 1.12.19 AM.png)
-![](Resources/Images/Screen Shots/Screen Shot 2019-02-09 at 1.12.55 AM.png)
+![asdf](Resources/Images/Screen Shots/Screen Shot 2019-02-09 at 1.12.19 AM.png)
+![asdf](Resources/Images/Screen Shots/Screen Shot 2019-02-09 at 1.12.55 AM.png)
 
 ## Recommendations:
 
