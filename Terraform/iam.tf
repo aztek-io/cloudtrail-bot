@@ -66,7 +66,8 @@ POLICY
         Application = "${lookup(var.global,"application")}"
         Environment = "${lookup(var.global,"environment")}"
         Project     = "${lookup(var.global,"project")}"
-        Cleanup     = "${lookup(var.global,"cleanup")}"
+        AutoCleanup = "${lookup(var.global,"autocleanup")}"
+        IaC         = "${lookup(var.global,"IaC")}"
     }
 }
 

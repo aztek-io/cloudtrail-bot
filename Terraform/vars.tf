@@ -9,7 +9,8 @@ variable "global" {
         application = "CloudTrailBot"
         project     = "ChatOps"
         environment = "Development"
-        cleanup     = "False"
+        autocleanup = "False"
+        IaC         = "True"
     }
 }
 
