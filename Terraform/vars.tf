@@ -11,6 +11,20 @@ variable "global" {
     }
 }
 
+variable "event_ignore_list" {
+    type    = "list"
+    default = [
+        "^Describe*",
+        "^Assume*",
+        "^List*",
+        "^Get*",
+        "^Decrypt*",
+        "^Lookup*",
+        "^CreateLogStream$",
+        "^RenewRole$"
+    ]
+}
+
 ########################################
 ### Data Sources #######################
 ########################################

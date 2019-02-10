@@ -16,8 +16,9 @@ resource "aws_lambda_function" "cloudtrail_bot" {
     timeout         = 5
     environment {
         variables   = {
-            SLACK_WEBHOOK = "${lookup(var.secret,"slack_webhook")}"
-            SLACK_CHANNEL = "${lookup(var.secret,"slack_channel")}"
+            SLACK_WEBHOOK       = "${lookup(var.secret,"slack_webhook")}"
+            SLACK_CHANNEL       = "${lookup(var.secret,"slack_channel")}"
+            EVENT_IGNORE_LIST   = "${jsonencode(var.event_ignore_list)}"
         }
     }
 
