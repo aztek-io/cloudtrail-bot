@@ -32,6 +32,13 @@ resource "aws_s3_bucket" "cloudtrail_logs" {
     ]
 }
 POLICY
+
+    tags {
+        Application = "${lookup(var.global,"application")}"
+        Environment = "${lookup(var.global,"environment")}"
+        Project     = "${lookup(var.global,"project")}"
+        Cleanup     = "${lookup(var.global,"cleanup")}"
+    }
 }
 
 resource "aws_s3_bucket_notification" "cloudtrail_logs" {

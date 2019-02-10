@@ -7,7 +7,9 @@ variable "global" {
     default = {
         region      = "us-west-2"
         application = "CloudTrailBot"
-        environment = "Staging"
+        project     = "ChatOps"
+        environment = "Development"
+        cleanup     = "False"
     }
 }
 

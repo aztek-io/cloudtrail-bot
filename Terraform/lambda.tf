@@ -25,6 +25,8 @@ resource "aws_lambda_function" "cloudtrail_bot" {
     tags {
         Application = "${lookup(var.global,"application")}"
         Environment = "${lookup(var.global,"environment")}"
+        Project     = "${lookup(var.global,"project")}"
+        Cleanup     = "${lookup(var.global,"cleanup")}"
     }
 }
 
