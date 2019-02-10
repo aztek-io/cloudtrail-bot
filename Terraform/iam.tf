@@ -44,9 +44,9 @@ POLICY
 ########################################
 
 resource "aws_iam_role" "lambda_cloudtrail_bot" {
-  name = "lambda_cloudtrail_bot"
+    name = "lambda_cloudtrail_bot"
 
-  assume_role_policy = <<POLICY
+    assume_role_policy = <<POLICY
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -61,6 +61,14 @@ resource "aws_iam_role" "lambda_cloudtrail_bot" {
     ]
 }
 POLICY
+
+    tags {
+        Application = "${lookup(var.global,"application")}"
+        Environment = "${lookup(var.global,"environment")}"
+        Project     = "${lookup(var.global,"project")}"
+        AutoCleanup = "${lookup(var.global,"autocleanup")}"
+        IaC         = "${lookup(var.global,"IaC")}"
+    }
 }
 
 ########################################

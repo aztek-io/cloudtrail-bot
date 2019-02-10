@@ -30,10 +30,12 @@ true    = True
 false   = False
 null    = None
 
-SLACK_CHANNEL   = os.environ['SLACK_CHANNEL']
-SLACK_WEBHOOK   = os.environ['SLACK_WEBHOOK']
-ICON_EMOJI      = ':cloudtrail:'
-USERNAME        = 'CloudTrail Bot'
+SLACK_CHANNEL       = os.environ['SLACK_CHANNEL']
+SLACK_WEBHOOK       = os.environ['SLACK_WEBHOOK']
+EVENT_IGNORE_LIST   = json.loads(os.environ['EVENT_IGNORE_LIST'])
+
+ICON_EMOJI          = ':cloudtrail:'
+USERNAME            = 'CloudTrail Bot'
 
 #######################################
 ### Main Function #####################
@@ -42,23 +44,12 @@ USERNAME        = 'CloudTrail Bot'
 def main(event, context):
     logger.info('Event: {}'.format(json.dumps(event, indent=4)))
 
-    event_ignore_list = [
-        '^Describe*',
-        '^Assume*',
-        '^List*',
-        '^Get*',
-        '^Decrypt*',
-        '^Lookup*',
-        '^CreateLogStream$',
-        '^RenewRole$'
-    ]
-
-    logger.info('Event ignore pattern list: {}'.format(event_ignore_list))
+    logger.info('Event ignore pattern list: {}'.format(EVENT_IGNORE_LIST))
 
     for e in event['Records']:
         bucket, s3_object   = parse_event(e)
         cloudtrail_event    = get_object_contents(bucket, s3_object)
-        note_worthy_events  = parse_cloudtrail_event(cloudtrail_event, event_ignore_list)
+        note_worthy_events  = parse_cloudtrail_event(cloudtrail_event)
 
         for n in note_worthy_events:
             payload = create_slack_payload(n)
@@ -104,7 +95,7 @@ def get_object_contents(bucket, s3_object):
     return contents
 
 
-def parse_cloudtrail_event(cloudtrail_event, ignore_list):
+def parse_cloudtrail_event(cloudtrail_event):
     note_worthy_events = list()
 
     logger.info('Iterating over cloudtrail events.')
@@ -117,20 +108,16 @@ def parse_cloudtrail_event(cloudtrail_event, ignore_list):
 
         ignore_logic = None
 
-        logger.info('action: {}'.format(simplified_event['eventName']))
-
-        for i in ignore_list:
-            if re.match(i, simplified_event['eventName']):
-                logger.info('ignoring: {}'.format(i))
+        for e in EVENT_IGNORE_LIST:
+            if re.match(e, simplified_event['eventName']):
+                logger.info('Ignoring event "{}" based on the following pattern: {}'.format(simplified_event['eventName'], e))
                 ignore_logic = True
 
         if not ignore_logic:
-            logger.info('Appending. ignore_logic: {}'.format(ignore_logic))
+            logger.info('Appending event "{}".'.format(simplified_event['eventName']))
             note_worthy_events.append(simplified_event)
-        else:
-            logger.info('Not appending.  ignore_logic: {}'.format(ignore_logic))
 
-    logger.info(json.dumps(note_worthy_events, indent=4))
+    logger.info('Note worthy events found: {}'.format(json.dumps(note_worthy_events, indent=4)))
 
     return note_worthy_events
 

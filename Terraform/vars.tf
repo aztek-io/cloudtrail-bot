@@ -7,8 +7,25 @@ variable "global" {
     default = {
         region      = "us-west-2"
         application = "CloudTrailBot"
-        environment = "Staging"
+        project     = "ChatOps"
+        environment = "Development"
+        autocleanup = "False"
+        IaC         = "True"
     }
+}
+
+variable "event_ignore_list" {
+    type    = "list"
+    default = [
+        "^Describe*",
+        "^Assume*",
+        "^List*",
+        "^Get*",
+        "^Decrypt*",
+        "^Lookup*",
+        "^CreateLogStream$",
+        "^RenewRole$"
+    ]
 }
 
 ########################################
