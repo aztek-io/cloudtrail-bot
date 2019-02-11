@@ -23,9 +23,21 @@ variable "event_ignore_list" {
         "^Get*",
         "^Decrypt*",
         "^Lookup*",
+        "^BatchGet*",
         "^CreateLogStream$",
         "^RenewRole$",
         "^REST.GET.OBJECT_LOCK_CONFIGURATION$"
+    ]
+}
+
+variable "user_ignore_list" {
+    type    = "list"
+    default = [
+        "^bamboo*",
+        "^gitlab*",
+        "^i-*",
+        "^ecs-service-scheduler$",
+        "^AWSCloudFormation$"
     ]
 }
 

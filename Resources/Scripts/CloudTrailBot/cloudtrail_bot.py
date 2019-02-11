@@ -33,6 +33,7 @@ null    = None
 SLACK_CHANNEL       = os.environ['SLACK_CHANNEL']
 SLACK_WEBHOOK       = os.environ['SLACK_WEBHOOK']
 EVENT_IGNORE_LIST   = json.loads(os.environ['EVENT_IGNORE_LIST'])
+USER_IGNORE_LIST    = json.loads(os.environ['USER_IGNORE_LIST'])
 
 ICON_EMOJI          = ':cloudtrail:'
 USERNAME            = 'CloudTrail Bot'
@@ -145,6 +146,9 @@ def create_simplified_event(cloudtrail_event):
         except IndexError:
             logger.error('Unable to split principalId: {}'.format(principalId))
             return False
+
+    if user in USER_IGNORE_LIST:
+        logger.info('Ignoring user based on ignore list: {}'.format(user))
 
     try:
         resources   = cloudtrail_event['resources']
