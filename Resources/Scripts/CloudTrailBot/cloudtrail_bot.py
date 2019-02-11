@@ -34,6 +34,10 @@ SLACK_CHANNEL       = os.environ['SLACK_CHANNEL']
 SLACK_WEBHOOK       = os.environ['SLACK_WEBHOOK']
 EVENT_IGNORE_LIST   = json.loads(os.environ['EVENT_IGNORE_LIST'])
 USER_IGNORE_LIST    = json.loads(os.environ['USER_IGNORE_LIST'])
+try:
+    IGNORE_CLOUDFORMATION = os.environ['IGNORE_CLOUDFORMATION']
+except KeyError:
+    pass
 
 ICON_EMOJI          = ':cloudtrail:'
 USERNAME            = 'CloudTrail Bot'
@@ -131,6 +135,14 @@ def parse_cloudtrail_event(cloudtrail_event):
 
 
 def create_simplified_event(cloudtrail_event):
+    if IGNORE_CLOUDFORMATION:
+        try:
+            if cloudtrail_event["userIdentity"]["invokedBy"] == "cloudformation.amazonaws.com":
+                logger.info("Ignoring this event since it was triggered via CloudFormation.")
+                return False
+        except KeyError:
+            pass
+
     try:
         user = cloudtrail_event['userIdentity']['userName']
     except KeyError:
