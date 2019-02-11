@@ -24,7 +24,8 @@ variable "event_ignore_list" {
         "^Decrypt*",
         "^Lookup*",
         "^CreateLogStream$",
-        "^RenewRole$"
+        "^RenewRole$",
+        "^REST.GET.OBJECT_LOCK_CONFIGURATION$"
     ]
 }
 
@@ -39,6 +40,7 @@ data "aws_iam_account_alias" "current" {}
 ########################################
 
 locals {
-    bucket_name = "security.${data.aws_iam_account_alias.current.account_alias}.logs"
+    cloudtrail_bucket_name  = "security.${data.aws_iam_account_alias.current.account_alias}.logs"
+    archives_bucket_name    = "archives.${data.aws_iam_account_alias.current.account_alias}.io"
 }
 
