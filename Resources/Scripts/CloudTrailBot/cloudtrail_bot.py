@@ -137,7 +137,7 @@ def parse_cloudtrail_event(cloudtrail_event):
 def create_simplified_event(cloudtrail_event):
     if IGNORE_CLOUDFORMATION:
         try:
-            if cloudtrail_event["userIdentity"]["invokedBy"] == "cloudformation.amazonaws.com":
+            if cloudtrail_event["eventSource"] == "cloudformation.amazonaws.com":
                 logger.info("Ignoring this event since it was triggered via CloudFormation.")
                 return False
         except KeyError:
