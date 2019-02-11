@@ -112,6 +112,7 @@ def parse_cloudtrail_event(cloudtrail_event):
             if re.match(e, simplified_event['eventName']):
                 logger.info('Ignoring event "{}" based on the following pattern: {}'.format(simplified_event['eventName'], e))
                 ignore_logic = True
+                break
 
         if not ignore_logic:
             logger.info('Appending event "{}".'.format(simplified_event['eventName']))
@@ -216,18 +217,25 @@ def create_slack_payload(json_dict, color='#FF8800', reason='New Cloud Trail Eve
 
 
 def post_to_slack(payload):
-    logger.info('POST-ing payload: {}'.format(payload))
+    logger.info('POST-ing payload: {}'.format(json.dumps(payload,indent=4)))
 
     try:
-        req = requests.post(SLACK_WEBHOOK, data=json.dumps(payload), timeout=3)
-        logger.info("Message posted to {}".format(payload['channel']))
+        req = requests.post(SLACK_WEBHOOK, data=str(payload), timeout=3)
+        logger.info("Message posted to {} using {}".format(payload['channel'], SLACK_WEBHOOK))
     except requests.exceptions.Timeout as e:
-        fatal("Server connection failed: {}".format(e.reason))
+        fatal("Server connection failed: {}".format(e))
     except requests.exceptions.RequestException as e:
         fatal("Request failed: {} {}".format(e.status_code, e.reason))
 
     if req.status_code != 200:
-        fatal("Non 200 status code: {}\n{}\n{}".format(req.status_code, req.headers, req.text), code=255)
+        fatal(
+            "Non 200 status code: {}\nResponse Headers: {}\nResponse Text: {}".format(
+                req.status_code,
+                req.headers,
+                json.dumps(req.text, indent=4)
+            ),
+            code=255
+        )
 
 
 #######################################
