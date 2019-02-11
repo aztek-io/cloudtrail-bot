@@ -34,9 +34,11 @@ variable "user_ignore_list" {
     type    = "list"
     default = [
         "^awslambda_*",
+        "^aws-batch$",
         "^bamboo*",
         "^i-*",
         "^ecs-service-scheduler$",
+        "^AutoScaling$",
         "^AWSCloudFormation$",
         "^SLRManagement$"
     ]
