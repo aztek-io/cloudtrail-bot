@@ -34,7 +34,6 @@ variable "user_ignore_list" {
     type    = "list"
     default = [
         "^bamboo*",
-        "^gitlab*",
         "^i-*",
         "^ecs-service-scheduler$",
         "^AWSCloudFormation$"
