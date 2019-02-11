@@ -33,10 +33,12 @@ variable "event_ignore_list" {
 variable "user_ignore_list" {
     type    = "list"
     default = [
+        "^awslambda_*",
         "^bamboo*",
         "^i-*",
         "^ecs-service-scheduler$",
-        "^AWSCloudFormation$"
+        "^AWSCloudFormation$",
+        "^SLRManagement$"
     ]
 }
 
