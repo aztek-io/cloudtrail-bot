@@ -115,6 +115,12 @@ def parse_cloudtrail_event(cloudtrail_event):
                 ignore_logic = True
                 break
 
+        for u in USER_IGNORE_LIST:
+            if re.match(u, simplified_event['invokedBy']):
+                logger.info('Ignoring user "{}" based on the following pattern: {}'.format(simplified_event['invokedBy'], u))
+                ignore_logic = True
+                break
+
         if not ignore_logic:
             logger.info('Appending event "{}".'.format(simplified_event['eventName']))
             note_worthy_events.append(simplified_event)
@@ -146,9 +152,6 @@ def create_simplified_event(cloudtrail_event):
         except IndexError:
             logger.error('Unable to split principalId: {}'.format(principalId))
             return False
-
-    if user in USER_IGNORE_LIST:
-        logger.info('Ignoring user based on ignore list: {}'.format(user))
 
     try:
         resources   = cloudtrail_event['resources']
