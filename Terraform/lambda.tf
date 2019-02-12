@@ -16,12 +16,11 @@ resource "aws_lambda_function" "cloudtrail_bot" {
     timeout         = 5
     environment {
         variables   = {
-            SLACK_WEBHOOK           = "${lookup(var.secret,"slack_webhook")}"
-            SLACK_CHANNEL           = "${lookup(var.secret,"slack_channel")}"
-            EVENT_IGNORE_LIST       = "${jsonencode(var.event_ignore_list)}"
-            USER_IGNORE_LIST        = "${jsonencode(var.user_ignore_list)}"
-            SOURCE_IGNORE_LIST        = "${jsonencode(var.source_ignore_list)}"
-            IGNORE_CLOUDFORMATION   = "Unset to not ignore."
+            SLACK_WEBHOOK       = "${lookup(var.secret,"slack_webhook")}"
+            SLACK_CHANNEL       = "${lookup(var.secret,"slack_channel")}"
+            EVENT_IGNORE_LIST   = "${jsonencode(var.event_ignore_list)}"
+            USER_IGNORE_LIST    = "${jsonencode(var.user_ignore_list)}"
+            SOURCE_IGNORE_LIST  = "${jsonencode(var.source_ignore_list)}"
         }
     }
 
