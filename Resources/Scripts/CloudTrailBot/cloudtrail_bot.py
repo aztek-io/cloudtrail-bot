@@ -30,12 +30,14 @@ true    = True
 false   = False
 null    = None
 
-SLACK_CHANNEL       = os.environ['SLACK_CHANNEL']
-SLACK_WEBHOOK       = os.environ['SLACK_WEBHOOK']
-EVENT_IGNORE_LIST   = json.loads(os.environ['EVENT_IGNORE_LIST'])
+SLACK_CHANNEL           = os.environ['SLACK_CHANNEL']
+SLACK_WEBHOOK           = os.environ['SLACK_WEBHOOK']
+EVENT_IGNORE_LIST       = json.loads(os.environ['EVENT_IGNORE_LIST'])
+USER_IGNORE_LIST        = json.loads(os.environ['USER_IGNORE_LIST'])
+SOURCE_IGNORE_LIST      = json.loads(os.environ['SOURCE_IGNORE_LIST'])
 
-ICON_EMOJI          = ':cloudtrail:'
-USERNAME            = 'CloudTrail Bot'
+ICON_EMOJI = ':cloudtrail:'
+USERNAME   = 'CloudTrail Bot'
 
 #######################################
 ### Main Function #####################
@@ -43,8 +45,6 @@ USERNAME            = 'CloudTrail Bot'
 
 def main(event, context):
     logger.info('Event: {}'.format(json.dumps(event, indent=4)))
-
-    logger.info('Event ignore pattern list: {}'.format(EVENT_IGNORE_LIST))
 
     for e in event['Records']:
         bucket, s3_object   = parse_event(e)
@@ -106,15 +106,17 @@ def parse_cloudtrail_event(cloudtrail_event):
         if not simplified_event:
             continue
 
-        ignore_logic = None
+        event_logic     = check_ignore_list(simplified_event, ignore_list=EVENT_IGNORE_LIST, key='eventName')
+        user_logic      = check_ignore_list(simplified_event, ignore_list=USER_IGNORE_LIST, key='invokedBy')
+        source_logic    = check_ignore_list(simplified_event, ignore_list=SOURCE_IGNORE_LIST, key='eventSource')
 
-        for e in EVENT_IGNORE_LIST:
-            if re.match(e, simplified_event['eventName']):
-                logger.info('Ignoring event "{}" based on the following pattern: {}'.format(simplified_event['eventName'], e))
-                ignore_logic = True
-                break
+        logic_list = [
+            event_logic,
+            user_logic,
+            source_logic
+        ]
 
-        if not ignore_logic:
+        if True not in logic_list:
             logger.info('Appending event "{}".'.format(simplified_event['eventName']))
             note_worthy_events.append(simplified_event)
 
@@ -124,6 +126,12 @@ def parse_cloudtrail_event(cloudtrail_event):
 
 
 def create_simplified_event(cloudtrail_event):
+    try:
+        eventSource = cloudtrail_event["eventSource"]
+    except KeyError:
+        logger.info("Ignoring this event since it was triggered via CloudFormation.")
+        eventSource = ''
+
     try:
         user = cloudtrail_event['userIdentity']['userName']
     except KeyError:
@@ -163,11 +171,23 @@ def create_simplified_event(cloudtrail_event):
         'eventTime': event_time,
         'eventName': action,
         'resources': resources,
-        'Region': region
+        'Region': region,
+        'eventSource': eventSource
     }
 
     return simplified_event
 
+
+def check_ignore_list(simplified_event, ignore_list, key):
+    ignore_logic = None
+
+    for pattern in ignore_list:
+        if re.match(pattern, simplified_event[key]):
+            logger.info('Ignoring {} attribute "{}" based on the following pattern: {}'.format(key, simplified_event[key], pattern))
+            ignore_logic = True
+            break
+
+    return ignore_logic
 
 def create_slack_payload(json_dict, color='#FF8800', reason='New Cloud Trail Event.'):
     logger.info('Creating slack payload from the following json: {}'.format(json_dict))

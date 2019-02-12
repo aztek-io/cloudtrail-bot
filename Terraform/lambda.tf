@@ -6,7 +6,7 @@
 ####################
 
 resource "aws_lambda_function" "cloudtrail_bot" {
-    s3_bucket       = "archives.aztek.io"
+    s3_bucket       = "${local.archives_bucket_name}"
     s3_key          = "cloudtrail_bot.zip"
     function_name   = "CloudTrailBot"
     role            = "${aws_iam_role.lambda_cloudtrail_bot.arn}"
@@ -19,6 +19,8 @@ resource "aws_lambda_function" "cloudtrail_bot" {
             SLACK_WEBHOOK       = "${lookup(var.secret,"slack_webhook")}"
             SLACK_CHANNEL       = "${lookup(var.secret,"slack_channel")}"
             EVENT_IGNORE_LIST   = "${jsonencode(var.event_ignore_list)}"
+            USER_IGNORE_LIST    = "${jsonencode(var.user_ignore_list)}"
+            SOURCE_IGNORE_LIST  = "${jsonencode(var.source_ignore_list)}"
         }
     }
 
