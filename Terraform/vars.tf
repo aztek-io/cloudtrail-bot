@@ -26,7 +26,9 @@ variable "event_ignore_list" {
         "^BatchGet*",
         "^CreateLogStream$",
         "^RenewRole$",
-        "^REST.GET.OBJECT_LOCK_CONFIGURATION$"
+        "^REST.GET.OBJECT_LOCK_CONFIGURATION$",
+        "^TestEventPattern$",
+        "^TestScheduleExpression$"
     ]
 }
 
