@@ -37,6 +37,7 @@ variable "user_ignore_list" {
         "^aws-batch$",
         "^bamboo*",
         "^i-*",
+        "^\d+$",
         "^ecs-service-scheduler$",
         "^AutoScaling$",
         "^AWSCloudFormation$",
