@@ -27,8 +27,10 @@ variable "event_ignore_list" {
         "^CreateLogStream$",
         "^RenewRole$",
         "^REST.GET.OBJECT_LOCK_CONFIGURATION$",
-        "^TestEventPattern$",
-        "^TestScheduleExpression$"
+        "TestEventPattern",
+        "TestScheduleExpression",
+        "CreateNetworkInterface",
+        "ValidateTemplate"
     ]
 }
 
@@ -43,6 +45,7 @@ variable "user_ignore_list" {
         "^ecs-service-scheduler$",
         "^AutoScaling$",
         "^AWSCloudFormation$",
+        "^CloudTrailBot$",
         "^SLRManagement$"
     ]
 }
