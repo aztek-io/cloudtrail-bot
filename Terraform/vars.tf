@@ -53,7 +53,8 @@ variable "user_ignore_list" {
 variable "source_ignore_list" {
     type    = "list"
     default = [
-        "batch.amazonaws.com"
+        "batch.amazonaws.com",
+        "config.amazonaws.com"
     ]
 }
 
