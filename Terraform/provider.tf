@@ -3,5 +3,6 @@
 ########################################
 
 provider "aws" {
-    region     = "${lookup(var.global,"region")}"
+    region  = "${lookup(var.global,"region")}"
+    profile = "default"
 }
