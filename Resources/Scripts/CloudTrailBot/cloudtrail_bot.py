@@ -106,6 +106,14 @@ def parse_cloudtrail_event(cloudtrail_event):
         if not simplified_event:
             continue
 
+        try:
+            sourceIP = cte["sourceIPAddress"]
+
+            if re.match('*.amazonaws.com', sourceIP):
+                continue
+        except:
+            pass
+
         event_logic     = check_ignore_list(simplified_event, ignore_list=EVENT_IGNORE_LIST, key='eventName')
         user_logic      = check_ignore_list(simplified_event, ignore_list=USER_IGNORE_LIST, key='invokedBy')
         source_logic    = check_ignore_list(simplified_event, ignore_list=SOURCE_IGNORE_LIST, key='eventSource')
