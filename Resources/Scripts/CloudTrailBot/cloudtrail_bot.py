@@ -146,15 +146,20 @@ def create_simplified_event(cloudtrail_event):
         try:
             principalId = cloudtrail_event['userIdentity']['principalId']
         except KeyError:
-            logger.error(
-                'Unable to determine the user for this event: {}'.format(
-                    json.dumps(
-                        cloudtrail_event,
-                        indent=4
+            try:
+                # this is sloppy and should be cleaned up in the future.
+                principalId = ':{}'.format(cloudtrail_event['userIdentity']['invokedBy'])
+            except KeyError:
+                logger.error(
+                    'Unable to determine the user for this event: {}'.format(
+                        json.dumps(
+                            cloudtrail_event,
+                            indent=4
+                        )
                     )
                 )
-            )
-            return False
+
+                return False
 
         try:
             user = principalId.split(':')[1]
