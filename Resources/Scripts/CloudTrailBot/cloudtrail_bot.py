@@ -109,7 +109,7 @@ def parse_cloudtrail_event(cloudtrail_event):
         try:
             sourceIP = cte["sourceIPAddress"]
 
-            if re.match('*.amazonaws.com', sourceIP):
+            if re.match('^.*.amazonaws.com$', sourceIP):
                 continue
         except:
             pass
