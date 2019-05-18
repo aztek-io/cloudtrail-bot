@@ -152,10 +152,7 @@ def create_simplified_event(cloudtrail_event):
             except KeyError:
                 logger.error(
                     'Unable to determine the user for this event: {}'.format(
-                        json.dumps(
-                            cloudtrail_event,
-                            indent=4
-                        )
+                        json.dumps(cloudtrail_event, indent=4)
                     )
                 )
 
