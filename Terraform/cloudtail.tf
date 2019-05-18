@@ -4,6 +4,7 @@ resource "aws_cloudtrail" "cloudtrail_bot" {
     s3_key_prefix                 = "prefix"
     include_global_service_events = true
     enable_log_file_validation    = true
+    is_multi_region_trail         = true
 
     tags {
         Application = "${lookup(var.global,"application")}"
