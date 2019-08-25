@@ -6,7 +6,7 @@ resource "aws_cloudtrail" "cloudtrail_bot" {
     enable_log_file_validation    = true
     is_multi_region_trail         = true
 
-    tags {
+    tags = {
         Application = "${lookup(var.global,"application")}"
         Environment = "${lookup(var.global,"environment")}"
         Project     = "${lookup(var.global,"project")}"
