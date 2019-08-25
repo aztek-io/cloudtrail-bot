@@ -90,7 +90,7 @@ def get_object_contents(bucket, s3_object):
 
     contents = json.loads(gzip.decompress(body))
 
-    logger.info('Object contents retrieved: {}'.format(type(contents)))
+    logger.debug('Object contents retrieved: {}'.format(type(contents)))
 
     return contents
 
@@ -98,8 +98,23 @@ def get_object_contents(bucket, s3_object):
 def parse_cloudtrail_event(cloudtrail_event):
     note_worthy_events = list()
 
-    logger.info('Iterating over cloudtrail events.')
+    logger.info('Iterating over CloudTrail Event Records.')
+    logger.debug('CloudTrail Event: {}'.format(cloudtrail_event))
 
+    if "Records" in cloudtrail_event:
+        note_worthy_events = parse_records(cloudtrail_event)
+    else:
+        try:
+            logger.info('Possible digest object found.')
+            logger.info('Digest End Time: {}'.format(cloudtrail_event["digestEndTime"]))
+            logger.info('This object is not going to be parsed')
+        except KeyError as e:
+            fatal('Key not found: {}'.format(e))
+
+    return note_worthy_events
+
+
+def parse_records(cloudtrail_event):
     for cte in cloudtrail_event['Records']:
         simplified_event = create_simplified_event(cte)
 
@@ -199,6 +214,7 @@ def check_ignore_list(simplified_event, ignore_list, key):
 
     return ignore_logic
 
+
 def create_slack_payload(json_dict, color='#FF8800', reason='New Cloud Trail Event.'):
     logger.info('Creating slack payload from the following json: {}'.format(json_dict))
 
@@ -296,7 +312,7 @@ if __name__ == '__main__':
                         "arn": "arn:aws:s3:::security.aztek.logs"
                     },
                     "object": {
-                        "key": "prefix/AWSLogs/976168295228/CloudTrail/us-west-2/2019/02/09/976168295228_CloudTrail_us-west-2_20190209T1735Z_V69UOWYLI6vAjDvM.json.gz"
+                        "key": "prefix/AWSLogs/976168295228/CloudTrail-Digest/us-west-1/2019/08/25/976168295228_CloudTrail-Digest_us-west-1_CloudTrailBot_us-west-2_20190825T120445Z.json.gz"
                     }
                 }
             }

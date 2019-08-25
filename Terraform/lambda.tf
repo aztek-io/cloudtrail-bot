@@ -1,5 +1,5 @@
 ########################################
-### Lambda Configs: ####################
+### Lambda Functions ###################
 ########################################
 
 # cloudtrail_bot
@@ -24,7 +24,7 @@ resource "aws_lambda_function" "cloudtrail_bot" {
         }
     }
 
-    tags {
+    tags = {
         Application = "${lookup(var.global,"application")}"
         Environment = "${lookup(var.global,"environment")}"
         Project     = "${lookup(var.global,"project")}"

@@ -2,38 +2,38 @@ resource "aws_s3_bucket" "cloudtrail_logs" {
     bucket        = "${local.cloudtrail_bucket_name}"
     force_destroy = true
 
-    policy = <<POLICY
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "",
-            "Effect": "Allow",
-            "Principal": {
-              "Service": "cloudtrail.amazonaws.com"
+    policy = <<-POLICY
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "cloudtrail.amazonaws.com"
+                },
+                "Action": "s3:GetBucketAcl",
+                "Resource": "arn:aws:s3:::${local.cloudtrail_bucket_name}"
             },
-            "Action": "s3:GetBucketAcl",
-            "Resource": "arn:aws:s3:::${local.cloudtrail_bucket_name}"
-        },
-        {
-            "Sid": "",
-            "Effect": "Allow",
-            "Principal": {
-              "Service": "cloudtrail.amazonaws.com"
-            },
-            "Action": "s3:PutObject",
-            "Resource": "arn:aws:s3:::${local.cloudtrail_bucket_name}/*",
-            "Condition": {
-                "StringEquals": {
-                    "s3:x-amz-acl": "bucket-owner-full-control"
+            {
+                "Sid": "",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": "cloudtrail.amazonaws.com"
+                },
+                "Action": "s3:PutObject",
+                "Resource": "arn:aws:s3:::${local.cloudtrail_bucket_name}/*",
+                "Condition": {
+                    "StringEquals": {
+                        "s3:x-amz-acl": "bucket-owner-full-control"
+                    }
                 }
             }
-        }
-    ]
-}
-POLICY
+        ]
+    }
+    POLICY
 
-    tags {
+    tags = {
         Application = "${lookup(var.global,"application")}"
         Environment = "${lookup(var.global,"environment")}"
         Project     = "${lookup(var.global,"project")}"
