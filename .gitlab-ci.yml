@@ -144,5 +144,5 @@ TerraformDestroy:
             --auto-approve \
             "$TERRAFORM_DIR"
   dependencies:
-    - TerraformApply
+    - apply
   when: manual
