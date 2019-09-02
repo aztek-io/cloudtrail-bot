@@ -96,8 +96,6 @@ def get_object_contents(bucket, s3_object):
 
 
 def parse_cloudtrail_event(cloudtrail_event):
-    note_worthy_events = list()
-
     logger.info('Iterating over CloudTrail Event Records.')
     logger.debug('CloudTrail Event: {}'.format(cloudtrail_event))
 
@@ -115,6 +113,8 @@ def parse_cloudtrail_event(cloudtrail_event):
 
 
 def parse_records(cloudtrail_event):
+    note_worthy_events = list()
+
     for cte in cloudtrail_event['Records']:
         simplified_event = create_simplified_event(cte)
 
@@ -271,7 +271,7 @@ def post_to_slack(payload):
     except requests.exceptions.Timeout as e:
         fatal("Server connection failed: {}".format(e))
     except requests.exceptions.RequestException as e:
-        fatal("Request failed: {} {}".format(e.status_code, e.reason))
+        fatal("Request failed: {}".format(e))
 
     if req.status_code != 200:
         fatal(
@@ -312,7 +312,7 @@ if __name__ == '__main__':
                         "arn": "arn:aws:s3:::security.aztek.logs"
                     },
                     "object": {
-                        "key": "prefix/AWSLogs/976168295228/CloudTrail-Digest/us-west-1/2019/08/25/976168295228_CloudTrail-Digest_us-west-1_CloudTrailBot_us-west-2_20190825T120445Z.json.gz"
+                        "key": "prefix/AWSLogs/976168295228/CloudTrail/us-west-2/2019/09/02/976168295228_CloudTrail_us-west-2_20190902T0055Z_9fKViF5k0gxtadp0.json.gz"
                     }
                 }
             }
