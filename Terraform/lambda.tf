@@ -9,7 +9,7 @@ resource "aws_lambda_function" "cloudtrail_bot" {
     s3_bucket       = local.archives_bucket_name
     s3_key          = "cloudtrail_bot.zip"
     function_name   = local.app_name
-    role            = aws_iam_role.lambda_cloudtrail_bot.arn
+    role            = aws_iam_role.cloudtrail_bot.arn
     handler         = "cloudtrail_bot.lambda_handler"
     runtime         = "python3.7"
     memory_size     = 128

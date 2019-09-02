@@ -2,7 +2,7 @@
 ### IAM Policies #######################
 ########################################
 
-resource "aws_iam_policy" "lambda_cloudtrail_bot" {
+resource "aws_iam_policy" "cloudtrail_bot" {
     name    = local.app_name
     path    = "/"
     policy  = <<-POLICY
@@ -70,7 +70,7 @@ resource "aws_iam_role" "cloudtrail_bot" {
 ########################################
 
 resource "aws_iam_role_policy_attachment" "cloudtrail_bot" {
-    role        = aws_iam_role.lambda_cloudtrail_bot.name
-    policy_arn  = aws_iam_policy.lambda_cloudtrail_bot.arn
+    role        = aws_iam_role.cloudtrail_bot.name
+    policy_arn  = aws_iam_policy.cloudtrail_bot.arn
 }
 
