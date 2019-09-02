@@ -12,6 +12,8 @@ variables:
   CLOUDTRAIL_BOT_ARCHIVE: Resources/Scripts/CloudTrailBot/cloudtrail_bot.zip
   CLOUDTRAIL_BOT_SCRIPT: Resources/Scripts/CloudTrailBot/cloudtrail_bot.py
   ARCHIVE_BUCKET: archives.aztek.io
+  TERRAFORM_DIR: "./Terraform"
+
 
 ########################################
 ### Prerequisites ######################
