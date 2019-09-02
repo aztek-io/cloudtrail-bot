@@ -34,6 +34,13 @@ variable "event_ignore_list" {
     ]
 }
 
+variable "event_always_alert_list" {
+    type    = list(string)
+    default = [
+        "DetachRolePolicy"
+    ]
+}
+
 variable "user_ignore_list" {
     type    = "list"
     default = [
