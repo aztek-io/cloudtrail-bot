@@ -6,12 +6,16 @@ variable "global" {
     type    = "map"
     default = {
         region      = "us-west-2"
-        application = "CloudTrailBot"
-        project     = "ChatOps"
-        environment = "Development"
-        autocleanup = "False"
-        IaC         = "True"
     }
+}
+
+variable "project" {}
+variable "environment" {}
+variable "channel" {}
+variable "webhook" {}
+
+variable "project_minor" {
+    default = "cloudtrail-bot"
 }
 
 variable "event_ignore_list" {
@@ -78,5 +82,13 @@ data "aws_iam_account_alias" "current" {}
 locals {
     cloudtrail_bucket_name  = "security.${data.aws_iam_account_alias.current.account_alias}.logs"
     archives_bucket_name    = "archives.${data.aws_iam_account_alias.current.account_alias}.io"
+    tags = {
+        Project = var.project
+        Environment = var.environment
+        IaC = true
+        AutoCleanup = false
+        Consulting  = false
+    }
+    app_name = join("-", [var.project, var.environment, var.project_minor])
 }
 

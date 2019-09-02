@@ -1,49 +1,40 @@
-########################################
-### Image ##############################
-########################################
-
 image:
   name: hashicorp/terraform:light
   entrypoint:
     - '/usr/bin/env'
-    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 variables:
   CLOUDTRAIL_BOT_ARCHIVE: Resources/Scripts/CloudTrailBot/cloudtrail_bot.zip
   CLOUDTRAIL_BOT_SCRIPT: Resources/Scripts/CloudTrailBot/cloudtrail_bot.py
   ARCHIVE_BUCKET: archives.aztek.io
-
-########################################
-### Prerequisites ######################
-########################################
+  TERRAFORM_DIR: "./Terraform"
+  REMOTE_STATE_BUCKET: "aztek.terraform.tfstate"
+  REMOTE_STATE_BUCKET_REGION: "us-west-2"
+  PROJECT: "aztek"
+  ENVIRONMENT: "dev"
+  PROJECT_MINOR: "cloudtrail-bot"
 
 before_script:
-  - |
-        cat > ./Terraform/secrets.tf << EOF
-        variable "secret" {
-            type    = "map"
-            default = {
-                slack_webhook = "$SLACK_WEBHOOK",
-                slack_channel = "$SLACK_CHANNEL"
-            }
-        }
-        EOF
+  - set -e
   - |
         if command -v terraform; then
             terraform --version
-            terraform init ./Terraform
-        elif command -v aws; then
-            aws --version;
+            terraform init \
+                --backend-config="bucket=$REMOTE_STATE_BUCKET" \
+                --backend-config="region=$REMOTE_STATE_BUCKET_REGION" \
+                --backend-config="key=${PROJECT}/${ENVIRONMENT}/${PROJECT_MINOR}/terraform.tfstate" \
+                "$TERRAFORM_DIR"
         elif command -v docker; then
             docker --version;
         fi
 
 stages:
+  - test_syntax
   - build_artifacts
   - push_artifacts
-  - plan
-  - reprovision
-  - deploy
+  - terraform_plan
+  - terraform_apply
+  - terraform_destroy
 
 ########################################
 ### Build Artifacts ####################
@@ -73,7 +64,7 @@ buildCloudTrailBotArtifacts:
       - Resources/Scripts/CloudTrailBot/*
 
 ########################################
-### Build Artifacts ####################
+### Push Artifacts #####################
 ########################################
 
 pushCloudTrailBotArtifacts:
@@ -90,48 +81,58 @@ pushCloudTrailBotArtifacts:
       - .gitlab-ci.yml
       - Resources/Scripts/CloudTrailBot/*
 
-########################################
-### Plan ###############################
-########################################
-
-plan:
-  stage: plan
+TerraformValidate:
+  stage: test_syntax
   script:
-    - terraform plan ./Terraform
+    - terraform validate "$TERRAFORM_DIR"
   only:
     changes:
       - .gitlab-ci.yml
       - Terraform/*.tf
 
-########################################
-### Reprovision ########################
-########################################
-
-destroy:
-  stage: reprovision
+TerraformPlan:
+  stage: terraform_plan
   script:
-    - terraform destroy --target aws_lambda_function.cloudtrail_bot -auto-approve ./Terraform
-  dependencies:
-    - pushCloudTrailBotArtifacts
-  only:
-    changes:
-      - .gitlab-ci.yml
-      - Resources/Scripts/CloudTrailBot/*
-
-########################################
-### Apply ##############################
-########################################
-
-apply:
-  stage: deploy
-  script:
-    - terraform apply -auto-approve ./Terraform
-  dependencies:
-    - plan
-    - destroy
+    - |
+        terraform plan \
+            -var "project=$PROJECT" \
+            -var "environment=$ENVIRONMENT" \
+            -var "webhook=$SLACK_WEBHOOK" \
+            -var "channel=$SLACK_CHANNEL" \
+            -out="${PROJECT}-${ENVIRONMENT}.tf_plan" \
+            "$TERRAFORM_DIR"
+  artifacts:
+    name: "${PROJECT}-${ENVIRONMENT}"
+    paths:
+      - "*.tf_plan"
   only:
     changes:
       - .gitlab-ci.yml
       - Terraform/*.tf
-      - Resources/Scripts/CloudTrailBot/*
 
+TerraformApply:
+  stage: terraform_apply
+  script:
+    - terraform apply --auto-approve "${PROJECT}-${ENVIRONMENT}.tf_plan"
+  dependencies:
+    - TerraformPlan
+  only:
+    changes:
+      - .gitlab-ci.yml
+      - Terraform/*.tf
+
+TerraformDestroy:
+  stage: terraform_destroy
+  script:
+    - |
+        terraform destroy \
+            -var "project=$PROJECT" \
+            -var "environment=$ENVIRONMENT" \
+            -var "webhook=$SLACK_WEBHOOK" \
+            -var "channel=$SLACK_CHANNEL" \
+            -var "environment=$ENVIRONMENT" \
+            --auto-approve \
+            "$TERRAFORM_DIR"
+  dependencies:
+    - TerraformApply
+  when: manual
