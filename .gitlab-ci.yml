@@ -44,6 +44,7 @@ stages:
   - plan
   - reprovision
   - deploy
+  - terraform_destroy
 
 ########################################
 ### Build Artifacts ####################
@@ -135,3 +136,13 @@ apply:
       - Terraform/*.tf
       - Resources/Scripts/CloudTrailBot/*
 
+TerraformDestroy:
+  stage: terraform_destroy
+  script:
+    - |
+        terraform destroy \
+            --auto-approve \
+            "$TERRAFORM_DIR"
+  dependencies:
+    - apply
+  when: manual
