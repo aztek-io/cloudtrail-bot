@@ -3,7 +3,7 @@
 ########################################
 
 resource "aws_iam_policy" "lambda_cloudtrail_bot" {
-    name    = "lambda_cloudtrail_bot"
+    name    = local.app_name
     path    = "/"
     policy  = <<-POLICY
     {
@@ -43,8 +43,8 @@ resource "aws_iam_policy" "lambda_cloudtrail_bot" {
 ### IAM Roles ##########################
 ########################################
 
-resource "aws_iam_role" "lambda_cloudtrail_bot" {
-    name = "lambda_cloudtrail_bot"
+resource "aws_iam_role" "cloudtrail_bot" {
+    name = local.app_name
 
     assume_role_policy = <<-POLICY
     {
@@ -62,24 +62,15 @@ resource "aws_iam_role" "lambda_cloudtrail_bot" {
     }
     POLICY
 
-    tags = {
-        Application = "${lookup(var.global,"application")}"
-        Environment = "${lookup(var.global,"environment")}"
-        Project     = "${lookup(var.global,"project")}"
-        AutoCleanup = "${lookup(var.global,"autocleanup")}"
-        IaC         = "${lookup(var.global,"IaC")}"
-    }
+    tags = local.tags
 }
 
 ########################################
 ### IAM Policy Attachments #############
 ########################################
 
-resource "aws_iam_policy_attachment" "lambda_cloudtrail_bot" {
-    name            = "lambda_cloudtrail_bot"
-    roles           = [
-        "${aws_iam_role.lambda_cloudtrail_bot.name}"
-    ]
-    policy_arn      = "${aws_iam_policy.lambda_cloudtrail_bot.arn}"
+resource "aws_iam_role_policy_attachment" "cloudtrail_bot" {
+    role        = aws_iam_role.lambda_cloudtrail_bot.name
+    policy_arn  = aws_iam_policy.lambda_cloudtrail_bot.arn
 }
 
