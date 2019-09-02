@@ -33,6 +33,7 @@ null    = None
 SLACK_CHANNEL           = os.environ['SLACK_CHANNEL']
 SLACK_WEBHOOK           = os.environ['SLACK_WEBHOOK']
 EVENT_IGNORE_LIST       = json.loads(os.environ['EVENT_IGNORE_LIST'])
+EVENT_ALERT_LIST        = json.loads(os.environ['EVENT_ALERT_LIST'])
 USER_IGNORE_LIST        = json.loads(os.environ['USER_IGNORE_LIST'])
 SOURCE_IGNORE_LIST      = json.loads(os.environ['SOURCE_IGNORE_LIST'])
 
@@ -129,9 +130,9 @@ def parse_records(cloudtrail_event):
         except:
             pass
 
-        event_logic     = check_ignore_list(simplified_event, ignore_list=EVENT_IGNORE_LIST, key='eventName')
-        user_logic      = check_ignore_list(simplified_event, ignore_list=USER_IGNORE_LIST, key='invokedBy')
-        source_logic    = check_ignore_list(simplified_event, ignore_list=SOURCE_IGNORE_LIST, key='eventSource')
+        event_logic     = check_list(simplified_event, check_list=EVENT_IGNORE_LIST, key='eventName')
+        user_logic      = check_list(simplified_event, check_list=USER_IGNORE_LIST, key='invokedBy')
+        source_logic    = check_list(simplified_event, check_list=SOURCE_IGNORE_LIST, key='eventSource')
 
         logic_list = [
             event_logic,
@@ -139,7 +140,9 @@ def parse_records(cloudtrail_event):
             source_logic
         ]
 
-        if True not in logic_list:
+        always_alert = check_list(simplified_event, check_list=EVENT_ALERT_LIST, key='eventName', ignore=False)
+
+        if True not in logic_list or always_alert:
             logger.info('Appending event "{}".'.format(simplified_event['eventName']))
             note_worthy_events.append(simplified_event)
 
@@ -203,16 +206,20 @@ def create_simplified_event(cloudtrail_event):
     return simplified_event
 
 
-def check_ignore_list(simplified_event, ignore_list, key):
-    ignore_logic = None
+def check_list(simplified_event, check_list, key, ignore=True):
+    return_logic = None
 
-    for pattern in ignore_list:
-        if re.match(pattern, simplified_event[key]):
+    for pattern in check_list:
+        if re.match(pattern, simplified_event[key]) and ignore:
             logger.info('Ignoring {} attribute "{}" based on the following pattern: {}'.format(key, simplified_event[key], pattern))
-            ignore_logic = True
+            return_logic = True
+            break
+        elif re.match(pattern, simplified_event[key]) and not ignore:
+            logger.info('Adding {} attribute "{}" based on the following pattern "{}"'.format(key, simplified_event[key], pattern))
+            return_logic = True
             break
 
-    return ignore_logic
+    return return_logic
 
 
 def create_slack_payload(json_dict, color='#FF8800', reason='New Cloud Trail Event.'):
