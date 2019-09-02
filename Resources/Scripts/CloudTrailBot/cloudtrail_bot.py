@@ -107,6 +107,7 @@ def parse_cloudtrail_event(cloudtrail_event):
             logger.info('Possible digest object found.')
             logger.info('Digest End Time: {}'.format(cloudtrail_event["digestEndTime"]))
             logger.info('This object is not going to be parsed')
+            note_worthy_events = list()
         except KeyError as e:
             fatal('Key not found: {}'.format(e))
 
@@ -319,7 +320,7 @@ if __name__ == '__main__':
                         "arn": "arn:aws:s3:::security.aztek.logs"
                     },
                     "object": {
-                        "key": "prefix/AWSLogs/976168295228/CloudTrail/us-west-2/2019/09/02/976168295228_CloudTrail_us-west-2_20190902T0055Z_9fKViF5k0gxtadp0.json.gz"
+                        "key": "prefix/AWSLogs/976168295228/CloudTrail-Digest/eu-west-2/2019/09/02/976168295228_CloudTrail-Digest_eu-west-2_CloudTrailBot_us-west-2_20190902T120445Z.json.gz"
                     }
                 }
             }
