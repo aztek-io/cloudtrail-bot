@@ -45,7 +45,17 @@ USERNAME   = 'CloudTrail Bot'
 #######################################
 
 def main(event, context):
-    logger.info('Event: {}'.format(json.dumps(event, indent=4)))
+    try:
+        logger.info(
+            'Checking s3 objects: {}'.format(
+                [
+                    record['object']['key'] for record in event['Records']
+                ]
+            )
+        )
+    except KeyError as e:
+        logger.warn(e)
+        logger.info('Event: {}'.format(event))
 
     for e in event['Records']:
         bucket, s3_object   = parse_event(e)
@@ -147,7 +157,7 @@ def parse_records(cloudtrail_event):
             logger.info('Appending event "{}".'.format(simplified_event['eventName']))
             note_worthy_events.append(simplified_event)
 
-    logger.info('Note worthy events found: {}'.format(json.dumps(note_worthy_events, indent=4)))
+    logger.info('Note worthy events found: {}'.format(note_worthy_events))
 
     return note_worthy_events
 
