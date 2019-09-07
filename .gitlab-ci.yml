@@ -89,6 +89,7 @@ TerraformValidate:
     changes:
       - .gitlab-ci.yml
       - Terraform/*.tf
+      - Resources/Scripts/CloudTrailBot/*
 
 TerraformPlan:
   stage: terraform_plan
@@ -109,6 +110,7 @@ TerraformPlan:
     changes:
       - .gitlab-ci.yml
       - Terraform/*.tf
+      - Resources/Scripts/CloudTrailBot/*
 
 TerraformApply:
   stage: terraform_apply
@@ -120,6 +122,7 @@ TerraformApply:
     changes:
       - .gitlab-ci.yml
       - Terraform/*.tf
+      - Resources/Scripts/CloudTrailBot/*
 
 TerraformDestroy:
   stage: terraform_destroy
