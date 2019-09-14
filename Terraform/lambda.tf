@@ -13,7 +13,7 @@ resource "aws_lambda_function" "cloudtrail_bot" {
     handler         = "cloudtrail_bot.lambda_handler"
     runtime         = "python3.7"
     memory_size     = 128
-    timeout         = 5
+    timeout         = 15
     environment {
         variables   = {
             SLACK_WEBHOOK       = var.webhook
